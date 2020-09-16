@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Persistence via URL</title>
+    <link rel="stylesheet" href="mvp.css" />
+  </head>
+  <body>
+    <main>
+      <article>
+        <h1>How to use your URL as a shareable JSON database.</h1>
+
+        <p>
+          Wish you had a way to share data with your friends in a frontend-only
+          project?
+        </p>
+
+        <p>
+          Turns out you can! You can place your data inside your URIs and then
+          copy/paste them to your friends. It's that simple.
+        </p>
+        <p>
+          This project is a quick proof of concept whipped up in 30 minutes to
+          show you how to do it.
+        </p>
+
+        <h2>Instructions</h2>
+        <ol>
+          <li>Type data in the text box below.</li>
+          <li>Click "Save".</li>
+          <li>Copy + paste the URL to your friends.</li>
+          <li>Your friends receive the same data that you saved earlier.</li>
+        </ol>
+
+        <form onsubmit="saveText()">
+          <label for="input-body">
+            Input Data
+            <textarea
+              name="input-body"
+              id="input-body"
+              style="min-width: 100%; min-height: 100px; box-sizing: border-box"
+            ></textarea>
+            <input type="submit" value="Save" />
+          </label>
+          <p style="color: blue">
+            <i
+              >This project was built in a single file (plus a CSS stylesheet).
+              You can check it out in your debug console.</i
+            >
+          </p>
+        </form>
+
+        <h2>How to build your own</h2>
+        <p>The recipe is super simple.</p>
+
+        <h3>Function to save the data to the URL</h3>
+        <p>
+          In order to save data, all you have to do is use the following data.
+          Your data will be saved to your URL, and you can copy/paste it to your
+          friends.
+        </p>
+        <pre>
+          function save(json={}) {
+            // step 1, serialize the JSON to a string.
+            const dataToSave = JSON.stringify(json); // stringify the json
+            const base64 = btoa(dataToSave);         // base64 encode the data, for aesthetic purposes
+            const hash = encodeURIComponent(base64); // encode the string as a URI component
+
+            // step 2, add the string to a param called 'data-hash'
+            const urlParams = new URLSearchParams(window.location.search);
+            urlParams.set("data-hash", hash);
+            window.location.search = urlParams;
+          }
+        </pre>
+        <h3>Function to load the data from the URL</h3>
+        <p>
+          Loading the data back is even easier. You just read the URL params and
+          decode the data.
+        </p>
+        <pre>
+          function load() {
+            // get the data from the hash
+            const urlParams = new URLSearchParams(window.location.search);
+            const hash = urlParams.get("data-hash");
+
+            // if there is no data, return empty object.
+            if (!hash) {
+              return {};
+            }
+            
+            // else decode and return the object
+            const jsonString = atob(decodeURIComponent(hash));
+            return JSON.parse(jsonString);
+          }
+        </pre>
+        <h2>About the author</h2>
+        <p>
+          Monarch Wadia is a senior developer, software "architect", and the CEO
+          & CTO at <a href="https://www.mintbean.io">Mintbean.io</a>. There, he
+          builds hackathons which help developers sharpen their skills. He
+          enjoys coding immensely.
+        </p>
+        <p>
+          You can connect with Monarch on
+          <a href="https://www.mintbean.io">LinkedIn</a> or
+          <a href="https://www.mintbean.io">Twitter</a>
+        </p>
+      </article>
+    </main>
+    <script>
+      function loadText() {
+        const { data } = load();
+        document.getElementById("input-body").value = data || "";
+      }
+
+      function saveText() {
+        event.preventDefault();
+        const data = document.getElementById("input-body").value;
+        save({ data });
+      }
+
+      function save(json = {}) {
+        // step 1, serialize the JSON to a string.
+        const dataToSave = JSON.stringify(json); // stringify the json
+        const base64 = btoa(dataToSave); // base64 encode the data, for aesthetic purposes
+        const hash = encodeURIComponent(base64); // encode the string as a URI component
+
+        // step 2, add the string to a param called 'data-hash'
+        const urlParams = new URLSearchParams(window.location.search);
+        urlParams.set("data-hash", hash);
+        window.location.search = urlParams;
+      }
+
+      function load() {
+        // get the data from the hash
+        const urlParams = new URLSearchParams(window.location.search);
+        const hash = urlParams.get("data-hash");
+
+        // if there is no data, return empty object.
+        if (!hash) {
+          return {};
+        }
+
+        // else decode and return the object
+        const jsonString = atob(decodeURIComponent(hash));
+        return JSON.parse(jsonString);
+      }
+
+      loadText();
+    </script>
+  </body>
+</html>
